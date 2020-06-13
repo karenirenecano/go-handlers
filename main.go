@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -47,6 +48,17 @@ func init() {
 	}
 }
 
+func getNextID() int {
+	highestID := -1
+	for _, product := range productList {
+		if highestID < product.ProductID {
+			highestID = product.ProductID
+		}
+	}
+
+	return highestID + 1
+}
+
 func productsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -58,6 +70,27 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(productsJSON)
+
+	case http.MethodPost:
+		var newProduct Product
+		bodyBytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		err = json.Unmarshal(bodyBytes, &newProduct)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if newProduct.ProductID != 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		newProduct.ProductID = getNextID()
+		productList = append(productList, newProduct)
+		w.WriteHeader(http.StatusCreated)
+		return
 	}
 }
 
