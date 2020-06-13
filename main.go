@@ -79,7 +79,7 @@ func productHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product, _ := findProductByID(productID)
+	product, listItemIndex := findProductByID(productID)
 	if product == nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -95,6 +95,30 @@ func productHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(productJSON)
+	case http.MethodPut:
+		//update product in the list
+		var updatedProduct Product
+		bodyBytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		err = json.Unmarshal(bodyBytes, &updatedProduct)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if updatedProduct.ProductID != productID {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		product = &updatedProduct
+		productList[listItemIndex] = *product
+		w.WriteHeader(http.StatusOK)
+		return
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
 	}
 }
 
