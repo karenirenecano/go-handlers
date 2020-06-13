@@ -2,9 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 //Product struct
@@ -55,8 +58,44 @@ func getNextID() int {
 			highestID = product.ProductID
 		}
 	}
-
 	return highestID + 1
+}
+
+func findProductByID(productID int) (*Product, int) {
+	for i, product := range productList {
+		if product.ProductID == productID {
+			return &product, i
+		}
+	}
+	return nil, 0
+}
+
+func productHandler(w http.ResponseWriter, r *http.Request) {
+	urlPathSegments := strings.Split(r.URL.Path, "products/")
+	fmt.Println(urlPathSegments)
+	productID, err := strconv.Atoi(urlPathSegments[len(urlPathSegments)-1])
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	product, _ := findProductByID(productID)
+	if product == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		//get product detail by id
+		productJSON, err := json.Marshal(product)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(productJSON)
+	}
 }
 
 func productsHandler(w http.ResponseWriter, r *http.Request) {
@@ -96,5 +135,6 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/products", productsHandler)
+	http.HandleFunc("/products/", productHandler)
 	http.ListenAndServe(":5000", nil)
 }
