@@ -1,0 +1,20 @@
+[
+	{
+		"productId": 123,
+		"manufacturer": "Big Box Company",
+		"sku": "4561qHJK",
+		"upc": "41465444566",
+		"pricePerUnit": "12.99",
+		"quantityOnHand": "28",
+		"productName": "Gizmo"
+	},
+	{
+		"productId": 124,
+		"manufacturer": "Company 2",
+		"sku": "5555",
+		"upc": "1233333",
+		"pricePerUnit": "566",
+		"quantityOnHand": "300",
+		"productName": "Succulents"
+	}
+]

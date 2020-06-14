@@ -26,7 +26,11 @@ func init() {
 }
 
 func loadProductMap() (map[int]Product, error) {
-	fileName := "products.json"
+	path, errorNotFound := os.Getwd()
+	if errorNotFound != nil {
+		log.Fatal(errorNotFound)
+	}
+	fileName := path + "/product/products.json"
 	_, err := os.Stat(fileName)
 	if os.IsNotExist(err) {
 		return nil, fmt.Errorf("file [%s] does not exist", fileName)
@@ -62,7 +66,7 @@ func removeProduct(productID int) {
 }
 
 func getProductList() []Product {
-	productMap.RLock()
+	productMap.Lock()
 	products := make([]Product, 0, len(productMap.m))
 	for _, value := range productMap.m {
 		products = append(products, value)
