@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/karenirenecano/go-handlers/product"
 )
 
 var productList []Product
@@ -58,42 +59,6 @@ func findProductByID(productID int) (*Product, int) {
 	return nil, 0
 }
 
-func productsHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		productsJSON, err := json.Marshal(productList)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(productsJSON)
-		return
-
-	case http.MethodPost:
-		var newProduct Product
-		bodyBytes, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		err = json.Unmarshal(bodyBytes, &newProduct)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		if newProduct.ProductID != 0 {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		newProduct.ProductID = getNextID()
-		productList = append(productList, newProduct)
-		w.WriteHeader(http.StatusCreated)
-		return
-	}
-}
-
 func middlewareHandler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("before handler; middleware start")
@@ -106,11 +71,9 @@ func middlewareHandler(handler http.Handler) http.Handler {
 	})
 }
 
-func main() {
-	productListHandler := http.HandlerFunc(productsHandler)
-	productItemHandler := http.HandlerFunc(productHandler)
+const apiBasePath = "/api"
 
-	http.Handle("/products", middlewareHandler(productListHandler))
-	http.Handle("/products/", middlewareHandler(productItemHandler))
+func main() {
+	product.SetupRoutes(apiBasePath)
 	http.ListenAndServe(":5000", nil)
 }
