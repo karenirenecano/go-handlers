@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/karenirenecano/go-handlers/utils"
 )
 
 //DbConn globally declared
@@ -18,9 +18,8 @@ var DbConn *sql.DB
 //SetupDatabase for referencing db connection
 func SetupDatabase() {
 	var err error
-
 	rootCertPool := x509.NewCertPool()
-	caPemKeyFile, err := getCWD("/ssl_certs/ca.pem")
+	caPemKeyFile, err := utils.GetCWD("/ssl_certs/ca.pem")
 	fmt.Println(caPemKeyFile)
 	if err != nil {
 		log.Fatal(err)
@@ -33,13 +32,13 @@ func SetupDatabase() {
 		log.Fatal("Failed to append PEM.")
 	}
 	clientCert := make([]tls.Certificate, 0, 1)
-	clientCertFile, err := getCWD("/ssl_certs/client-cert.pem")
+	clientCertFile, err := utils.GetCWD("/ssl_certs/client-cert.pem")
 	fmt.Println(clientCertFile)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	clientKeyFile, err := getCWD("/ssl_certs/client-key.pem")
+	clientKeyFile, err := utils.GetCWD("/ssl_certs/client-key.pem")
 	fmt.Println(clientKeyFile)
 
 	if err != nil {
@@ -69,18 +68,4 @@ func SetupDatabase() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func getCWD(file string) (certDir string, err error) {
-	path, errorNotFound := os.Getwd()
-	if errorNotFound != nil {
-		log.Fatal(errorNotFound)
-	}
-	fileName := path + file
-	_, errorMessage := os.Stat(fileName)
-	if os.IsNotExist(errorMessage) {
-		return "Not existing", fmt.Errorf("file [%s] does not exist", fileName)
-	}
-
-	return fileName, nil
 }
