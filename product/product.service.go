@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/karenirenecano/go-handlers/cors"
-	"github.com/karenirenecano/go-handlers/utils"
 )
 
 const productsBasePath = "products"
@@ -23,8 +22,6 @@ func SetupRoutes(apiBasePath string) {
 }
 
 func productsHandler(w http.ResponseWriter, r *http.Request) {
-	utils.SetGlobalEnvVariables()
-
 	switch r.Method {
 	case http.MethodGet:
 		productList, err := getProductList()
