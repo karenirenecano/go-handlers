@@ -73,6 +73,7 @@ func getProductList() ([]Product, error) {
 		upc, pricePerUnit, quantityOnHand, productName
 		FROM products
 	`)
+
 	if err != nil {
 		return nil, err
 	}

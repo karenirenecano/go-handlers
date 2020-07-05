@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/karenirenecano/go-handlers/utils"
@@ -55,11 +57,11 @@ func SetupDatabase() {
 		InsecureSkipVerify: true,
 	})
 	configSettings := mysql.Config{
-		User:                 "root",
-		Passwd:               "root",
-		Addr:                 "localhost.co:3306", //IP:PORT
+		User:                 strings.TrimSpace(os.Getenv("DB_USERNAME")),
+		Passwd:               strings.TrimSpace(os.Getenv("DB_PASSWORD")),
+		Addr:                 strings.TrimSpace(os.Getenv("DB_ADDRESS")), //IP:PORT
 		Net:                  "tcp",
-		DBName:               "inventorydb",
+		DBName:               strings.TrimSpace(os.Getenv("DB_NAME")),
 		AllowNativePasswords: true,
 		TLSConfig:            "custom",
 	}
